@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PTC Kasur EV Fleet & Inspection Manager (2026 & 2027)</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --primary: #0f4c3a;
+    --primary-dark: #092e23;
+    --accent: #d97706;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #475569;
+    --border: #cbd5e1;
+    --success: #15803d;
+    --danger: #b91c1c;
+    --info: #1d4ed8;
+  }
+  * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); }
+
+  header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 14px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 0.3px; }
+  header p { margin: 3px 0 0; font-size: 0.8rem; opacity: 0.9; }
+  .header-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+  .year-box {
+    background: rgba(255,255,255,0.16);
+    padding: 5px 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+  .year-box select {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { opacity: 0.92; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-info { background: var(--info); color: white; }
+  .btn-whatsapp { background: #22c55e; color: #052e16; }
+  .btn-outline { background: white; color: var(--primary); border: 1px solid var(--primary); }
+
+  .link-badge {
+    font-size: 0.78rem;
+    background: rgba(255,255,255,0.14);
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.28);
+  }
+
+  .nav-tabs {
+    background: white;
+    padding: 0 18px;
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    padding: 11px 15px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.88rem;
+  }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f0fdf4; }
+
+  .container { max-width: 1540px; margin: 16px auto; padding: 0 16px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .kpi-card {
+    background: var(--card);
+    padding: 12px 14px;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .kpi-card h3 { margin: 0; font-size: 0.74rem; color: var(--muted); text-transform: uppercase; }
+  .kpi-card .val { font-size: 1.45rem; font-weight: 700; margin-top: 4px; }
+
+  .card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    margin-bottom: 16px;
+  }
+  .card h2 { margin-top: 0; font-size: 1.05rem; color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 14px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 0.78rem; font-weight: 600; color: #334155; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: #fff;
+  }
+
+  .table-wrap { overflow-x: auto; max-height: 65vh; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #f1f5f9; text-align: left; vertical-align: top; }
+  th { background: var(--primary); color: white; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+  tr:nth-child(even) { background: #f8fafc; }
+
+  .item-editor-card {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .item-editor-title {
+    font-weight: 700;
+    font-size: 0.86rem;
+    color: var(--primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .multi-opts-box {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 7px 9px;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  .opt-check-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    color: #1e293b;
+    cursor: pointer;
+    line-height: 1.25;
+  }
+  .opt-check-row input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .custom-edit-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #94a3b8;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  .wk-cell-box { display: flex; flex-direction: column; gap: 5px; min-width: 215px; }
+  .wk-cell-opts { display: flex; flex-direction: column; gap: 3px; max-height: 110px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; padding: 4px 6px; border-radius: 4px; }
+  .wk-cell-opts label { font-size: 0.74rem; display: flex; align-items: center; gap: 5px; cursor: pointer; margin: 0; }
+  .wk-cell-opts input[type="checkbox"] { width: 13px; height: 13px; accent-color: var(--primary); }
+
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.65); z-index: 900;
+    justify-content: center; align-items: center; padding: 12px;
+  }
+  .modal-box {
+    background: white; border-radius: 10px; max-width: 1120px; width: 100%;
+    max-height: 92vh; overflow-y: auto; padding: 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 12px;
+    position: sticky; top: -18px; background: white; z-index: 5; padding-top: 4px;
+    gap: 10px;
+  }
+
+  /* FULL SCREEN EDITOR OVERLAY FOR BUS BODY (INT & EXT) */
+  .fullscreen-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 1200;
+    flex-direction: column;
+    padding: 0;
+  }
+  .fullscreen-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .fullscreen-header h3 {
+    margin: 0;
+    font-size: 1.08rem;
+  }
+  .fullscreen-subbar {
+    background: #f8fafc;
+    padding: 10px 20px;
+    border-bottom: 1px solid #cbd5e1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .fullscreen-body {
+    flex: 1;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    background: #f1f5f9;
+    overflow: hidden;
+  }
+  .fullscreen-textarea {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    padding: 16px;
+    font-size: 1.08rem;
+    line-height: 1.65;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    background: #ffffff;
+    color: #0f172a;
+    resize: none;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .fullscreen-footer {
+    background: #ffffff;
+    border-top: 1px solid #cbd5e1;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .toast {
+    position: fixed; bottom: 18px; right: 18px;
+    background: #0f172a; color: white; padding: 11px 16px;
+    border-radius: 8px; font-size: 0.85rem; z-index: 1500;
+    display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>PUNJAB TRANSPORT COMPANY — KASUR DEPOT</h1>
+    <p>Multi-Option & Custom Editable Fleet Inspection System (2026 & 2027)</p>
+  </div>
+  <div class="header-actions">
+    <div class="year-box">
+      <span>Year File:</span>
+      <select id="activeYearSelect" onchange="switchActiveYear()">
+        <option value="2026">2026 (Till Dec 2026)</option>
+        <option value="2027">2027 (New Year File)</option>
+      </select>
+    </div>
+    <label class="btn btn-outline">
+      Import & Link Excel
+      <input type="file" id="excelUpload" accept=".xlsx,.xls" style="display:none" onchange="handleExcelImport(event)">
+    </label>
+    <button class="btn btn-info" onclick="linkExistingExcelFile()">Link Excel File</button>
+    <button class="btn btn-success" onclick="saveToLinkedExcel(true)">Save Linked Excel</button>
+    <span class="link-badge" id="linkedFileStatus">File: Not Linked</span>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('tab-daily', this)">Daily Status + Weekly Sync</button>
+  <button class="tab-btn" onclick="switchTab('tab-weekly', this)">Weekly Inspection Sheet</button>
+  <button class="tab-btn" onclick="switchTab('tab-damage', this)">Damage Entry & Log</button>
+  <button class="tab-btn" onclick="switchTab('tab-reports', this)">Filter, Excel & WhatsApp</button>
+</div>
+
+<div class="container">
+  <div class="kpi-grid">
+    <div class="kpi-card" style="border-color: var(--primary);">
+      <h3>Active Year</h3>
+      <div class="val" id="kpi-year">2026</div>
+    </div>
+    <div class="kpi-card" style="border-color: var(--success);">
+      <h3>Operational</h3>
+      <div class="val" id="kpi-op">0</div>
+    </div>
+    <div class="kpi-card" style="border-color: var(--info);">
+      <h3>Standby / Ready</h3>
+      <div class="val" id="kpi-sb">0</div>
+    </div>
+    <div class="kpi-card" style="border-color: var(--danger);">
+      <h3>Breakdown / Hold</h3>
+      <div class="val" id="kpi-bd">0</div>
+    </div>
+    <div class="kpi-card" style="border-color: var(--accent);">
+      <h3>Open Damages</h3>
+      <div class="val" id="kpi-dmg">0</div>
+    </div>
+  </div>
+
+  <!-- TAB 1: DAILY FLEET STATUS + WEEKLY SYNC -->
+  <div id="tab-daily" class="section active">
+    <div class="card">
+      <h2>Daily Bus-Wise Operational Status & Weekly Inspection Multi-Editor</h2>
+      <div class="filter-bar">
+        <div class="form-group">
+          <label>Entry Date</label>
+          <input type="date" id="dailyDate" onchange="onDailyDateChange()">
+        </div>
+        <div class="form-group">
+          <label>Target Weekly Sheet</label>
+          <select id="dailySyncWeek"></select>
+        </div>
+        <div class="form-group">
+          <label>Previous Day</label>
+          <button class="btn btn-outline" onclick="copyPreviousDayStatus()">Copy Previous Day</button>
+        </div>
+        <div class="form-group">
+          <label>Save Data</label>
+          <button class="btn btn-primary" onclick="saveDailyAndSyncWeekly()">Save Daily & Update Excel</button>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <button class="btn btn-whatsapp" onclick="shareDailyWhatsApp()">Send on WhatsApp</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bus #</th>
+              <th>Date</th>
+              <th>Operational Status</th>
+              <th>Odometer (KM)</th>
+              <th>Daily Remarks</th>
+              <th>Weekly Multi-Option & Editable Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="dailyTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: WEEKLY INSPECTION SHEET -->
+  <div id="tab-weekly" class="section">
+    <div class="card">
+      <h2>Weekly Night Duty Bus Inspection Sheet (Multi-Select + Editable Custom Text per Item)</h2>
+      <div class="filter-bar">
+        <div class="form-group">
+          <label>Select Weekly Sheet</label>
+          <select id="weekSelector" onchange="renderWeeklySheet()"></select>
+        </div>
+        <div class="form-group">
+          <label>Save Sheet</label>
+          <button class="btn btn-primary" onclick="saveWeeklyTableEdits()">Save Weekly & Update Excel</button>
+        </div>
+        <div class="form-group">
+          <label>Previous Week</label>
+          <button class="btn btn-outline" onclick="carryForwardPreviousWeek()">Carry Forward Previous Week</button>
+        </div>
+        <div class="form-group">
+          <label>Single Week Export</label>
+          <button class="btn btn-success" onclick="exportSingleWeekExcel()">Save This Week (.xlsx)</button>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <button class="btn btn-whatsapp" onclick="shareWeeklyWhatsApp()">WhatsApp Weekly Summary</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead id="weeklyThead"></thead>
+          <tbody id="weeklyTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: DAMAGE ENTRY & LOG -->
+  <div id="tab-damage" class="section">
+    <div class="card">
+      <h2>New Damage / Defect Entry</h2>
+      <form id="damageForm" onsubmit="addDamageEntry(event)">
+        <div class="filter-bar" style="background:#fff;border:none;padding:0;margin-bottom:10px;">
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" id="dmgDate" required>
+          </div>
+          <div class="form-group" style="min-width:240px;">
+            <label>Bus Number *</label>
+            <select id="dmgBus" required onchange="renderBusPills()"></select>
+            <div id="dmgBusPills" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;"></div>
+          </div>
+          <div class="form-group">
+            <label>Inspection Category *</label>
+            <select id="dmgCategory" required></select>
+          </div>
+          <div class="form-group">
+            <label>Severity *</label>
+            <select id="dmgSeverity" required>
+              <option value="Minor">Minor (Cosmetic / Surface Mark)</option>
+              <option value="Moderate">Moderate (Workshop Repair Required)</option>
+              <option value="Critical">Critical (Operational Hold / Safety Risk)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Repair Status</label>
+            <select id="dmgStatus">
+              <option value="Pending">Pending</option>
+              <option value="In Workshop">In Workshop</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Target Weekly Sheet</label>
+            <select id="dmgTargetWeek"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Damage Description & Remarks *</label>
+          <textarea id="dmgDesc" rows="2" placeholder="Enter exact defect/damage observation..." required></textarea>
+        </div>
+        <div style="margin-top:10px;">
+          <button type="submit" class="btn btn-primary">Save Damage & Update Excel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Date-Wise Master Damages Log</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Bus #</th>
+              <th>Category</th>
+              <th>Severity</th>
+              <th>Description</th>
+              <th>Synced Week</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="damageLogBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: FILTER & REPORTS -->
+  <div id="tab-reports" class="section">
+    <div class="card">
+      <h2>Custom Filter, Excel Export & WhatsApp Reporting</h2>
+      <div class="filter-bar">
+        <div class="form-group">
+          <label>Report Source</label>
+          <select id="repType" onchange="runReportFilter()">
+            <option value="daily">Daily Fleet Status</option>
+            <option value="damages">Damages Log</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bus #</label>
+          <select id="repBus" onchange="runReportFilter()">
+            <option value="ALL">All Buses (KSR-01 to KSR-22)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>From Date</label>
+          <input type="date" id="repFrom" onchange="runReportFilter()">
+        </div>
+        <div class="form-group">
+          <label>To Date</label>
+          <input type="date" id="repTo" onchange="runReportFilter()">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="repStatus" onchange="runReportFilter()">
+            <option value="ALL">All Statuses</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Export</label>
+          <button class="btn btn-success" onclick="exportFilteredExcel()">Export Filtered Excel</button>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <button class="btn btn-whatsapp" onclick="shareFilteredWhatsApp()">WhatsApp Filtered Report</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead id="repThead"></thead>
+          <tbody id="repTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EVERY ITEM HAS MULTI-OPTION CHECKBOXES + OWN CUSTOM EDITABLE TEXT BOX -->
+<div class="modal-backdrop" id="busWeeklyModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 style="margin:0;color:var(--primary);" id="modalTitle">Weekly Inspection — KSR-01</h3>
+      <button class="btn btn-outline" onclick="closeBusModal()">Close</button>
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-top:0;">
+      Har item mein aap <strong>multiple options</strong> tick kar sakte hain aur <strong>apne alfaaz mein custom status/remarks</strong> bhi likh sakte hain.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;" id="modalFieldsGrid"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:white;padding-top:10px;border-top:1px solid #e2e8f0;">
+      <button class="btn btn-outline" onclick="closeBusModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBusModalData()">Save & Sync to Weekly Sheet</button>
+    </div>
+  </div>
+</div>
+
+<!-- FULL SCREEN EDITOR FOR BUS BODY (INT & EXT) -->
+<div class="fullscreen-backdrop" id="busBodyFullScreenModal">
+  <div class="fullscreen-header">
+    <div>
+      <h3 id="fsBodyTitle">Bus Body (Int & Ext) — Full Screen Remarks Editor</h3>
+      <span style="font-size:0.78rem;opacity:0.9;" id="fsBodySubtitle">Easy full-screen reading & writing mode</span>
+    </div>
+    <button type="button" class="btn btn-outline" onclick="closeBusBodyFullScreen()">Exit Full Screen</button>
+  </div>
+  <div class="fullscreen-subbar">
+    <span style="font-size:0.78rem;font-weight:700;color:#334155;">Quick Insert:</span>
+    <button type="button" class="btn btn-outline" style="padding:4px 9px;font-size:0.76rem;" onclick="appendFsBodyTag('Body Satisfactory')">+ Body Satisfactory</button>
+    <button type="button" class="btn btn-outline" style="padding:4px 9px;font-size:0.76rem;" onclick="appendFsBodyTag('Front Bumper Scratched')">+ Front Bumper</button>
+    <button type="button" class="btn btn-outline" style="padding:4px 9px;font-size:0.76rem;" onclick="appendFsBodyTag('Rear Bumper Damaged')">+ Rear Bumper</button>
+    <button type="button" class="btn btn-outline" style="padding:4px 9px;font-size:0.76rem;" onclick="appendFsBodyTag('Left Side Panel Dent/Scratch')">+ Left Panel</button>
+    <button type="button" class="btn btn-outline" style="padding:4px 9px;font-size:0.76rem;" onclick="appendFsBodyTag('Right Side Panel Dent/Scratch')">+ Right Panel</button>
+    <button type="button" class="btn btn-outline" style="padding:4px 9px;font-size:0.76rem;" onclick="appendFsBodyTag('Interior Floor / Ceiling Trim Issue')">+ Interior Trim</button>
+  </div>
+  <div class="fullscreen-body">
+    <textarea id="fsBodyTextarea" class="fullscreen-textarea" placeholder="Yahan Bus Body (Interior & Exterior) ke mukammal remarks likhein ya edit karein..."></textarea>
+  </div>
+  <div class="fullscreen-footer">
+    <span style="font-size:0.8rem;color:var(--muted);" id="fsCharCount">0 characters</span>
+    <div style="display:flex;gap:10px;">
+      <button type="button" class="btn btn-outline" onclick="closeBusBodyFullScreen()">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="applyBusBodyFullScreen()">Apply & Save Remarks</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BUS_LIST = Array.from({length: 22}, (_, i) => "KSR-" + String(i + 1).padStart(2, "0"));
+
+const FLEET_STATUSES = [
+  "Operational (On Route)",
+  "Standby / Depot Ready",
+  "Routine Maintenance",
+  "Breakdown - Mechanical",
+  "Breakdown - High Voltage / Battery",
+  "Breakdown - ITS / Validator / OBU",
+  "Body / Accident Hold",
+  "Awaiting Spare Parts"
+];
+
+const FIELD_OPTIONS = {
+  "Viper": ["Serviceable", "Wiper Blade Worn", "Wiper Arm / Linkage Fault", "Washer Nozzle / Reservoir Issue", "Non-Operational"],
+  "PIS": ["Operational", "Display Stop Name Not Updating", "Dim / Flickering Display", "Display Blank", "Non-Operational"],
+  "OBU": ["Operational", "Network / GPS Offline", "Power Supply Fault", "Configuration / Sync Issue", "Non-Operational"],
+  "Master Validator": ["Operational", "Power Supply Fault", "Display Screen Damaged", "Rear Housing Missing / Loose", "Card Reader Malfunction", "Non-Operational"],
+  "Slave Validator": ["Operational", "Power Supply Fault", "Display Screen Damaged", "Rear Housing Missing / Loose", "Not Installed", "Non-Operational"],
+  "Side Mirrors": ["Serviceable", "Right-Side Housing Scratched", "Left-Side Housing Scratched", "Left-Side Mirror Assembly Missing", "Right-Side Mirror Glass / Assembly Damaged"],
+  "Cleanliness (Int. & Ext.)": ["Satisfactory (Interior & Exterior Clean)", "Interior Satisfactory / Exterior Needs Wash", "Exterior Satisfactory / Interior Needs Cleaning", "AC Return Air Filters Clogged", "Deep Cleaning / Pressure Wash Required"],
+  "Cleanliness (AC Vents)": ["Clean / Serviceable", "Satisfactory", "Dust Accumulation / Louvers Need Cleaning"],
+  "Dust Cleaning (All Inspection Doors)": ["Clean / Serviceable", "Satisfactory", "Dust Accumulation Inside Panels", "Requires Thorough Panel Cleaning"],
+  "Charging Ports": ["Serviceable", "Port Cover / Latch Damaged", "Charging Gun / Socket Fault", "Non-Operational"],
+  "CCTV Cameras": ["Operational", "One Camera Offline", "Camera Angle / Focus Misaligned", "NVR / Recording Issue", "Non-Operational"],
+  "Seat Condition": ["Serviceable", "Upholstery Tear / Wear", "Seat Cushion / Frame Loose", "Grab Handle / Trim Issue"],
+  "Emg. Equipment": ["Complete / Serviceable", "First Aid Kit Missing / Incomplete", "Fire Extinguisher Missing / Inspection Due", "Emergency Glass Hammer Missing"],
+  "Windows & Doors": ["Serviceable", "Door Weatherstrip / Rubber Seal Fault", "Door Pneumatic / Latch Adjustment Required", "Window Glass Cracked / Broken", "Emergency Release Cover Damaged"],
+  "Lights (Int & Ext)": ["Serviceable", "Interior OK / Rear Brake Light Lens Damaged", "Interior OK / Parking Light Fault", "Rear Reflector Missing / Damaged", "Headlight / Turn Signal Fault"]
+};
+
+const WEEKLY_COLUMNS = [
+  "Bus #", "Odometer Reading", "Viper", "PIS", "OBU", "Master Validator",
+  "Slave Validator", "Side Mirrors", "Cleanliness (Int. & Ext.)",
+  "Cleanliness (AC Vents)", "Dust Cleaning (All Inspection Doors)",
+  "Charging Ports", "CCTV Cameras", "Seat Condition", "Emg. Equipment",
+  "Windows & Doors", "Lights (Int & Ext)", "Bus Body (Int & Ext)", "Other (if any)"
+];
+
+function buildSaturdaysForYear(year) {
+  let list = [];
+  let start = year === 2026 ? new Date(Date.UTC(2026, 7, 8)) : new Date(Date.UTC(2027, 0, 2));
+  let end = new Date(Date.UTC(year, 11, 31));
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const fullMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  let cur = new Date(start);
+  while (cur <= end) {
+    const dd = String(cur.getUTCDate()).padStart(2, "0");
+    const mmIdx = cur.getUTCMonth();
+    const yy = String(cur.getUTCFullYear()).slice(-2);
+    const iso = cur.toISOString().split("T")[0];
+    list.push({
+      name: dd + " " + months[mmIdx] + ". " + yy,
+      date: iso,
+      label: dd + " " + fullMonths[mmIdx] + " " + cur.getUTCFullYear()
+    });
+    cur.setUTCDate(cur.getUTCDate() + 7);
+  }
+  return list;
+}
+
+const WEEKS_2026 = buildSaturdaysForYear(2026);
+const WEEKS_2027 = buildSaturdaysForYear(2027);
+
+let store = JSON.parse(localStorage.getItem("kasur_ev_multi_year_v5")) || {
+  activeYear: "2026",
+  linkedFileNames: { "2026": "", "2027": "" },
+  years: {
+    "2026": { weeklySheets: {}, dailyLogs: [], damageLogs: [] },
+    "2027": { weeklySheets: {}, dailyLogs: [], damageLogs: [] }
+  }
+};
+
+let fileHandleByYear = { "2026": null, "2027": null };
+
+function openHandleDB() {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) return reject(new Error("IndexedDB unavailable"));
+    const req = indexedDB.open("KasurEVFileHandlesDB", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("handles");
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function persistHandleToDB(yearStr, handle) {
+  try {
+    const db = await openHandleDB();
+    const tx = db.transaction("handles", "readwrite");
+    tx.objectStore("handles").put(handle, "excel_" + yearStr);
+  } catch (e) {}
+}
+
+async function restoreHandleFromDB(yearStr) {
+  try {
+    const db = await openHandleDB();
+    return await new Promise((resolve) => {
+      const tx = db.transaction("handles", "readonly");
+      const req = tx.objectStore("handles").get("excel_" + yearStr);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+function currentYearData() {
+  return store.years[store.activeYear];
+}
+
+function getLinkedFileName(yearStr) {
+  const y = yearStr || store.activeYear;
+  const h = fileHandleByYear[y];
+  return (h && h.name) || store.linkedFileNames[y] || ("Weekly_Inspection_EV_Kasur_" + y + "_Master.xlsx");
+}
+
+function updateLinkedFileBadge() {
+  const badge = document.getElementById("linkedFileStatus");
+  const y = store.activeYear;
+  const h = fileHandleByYear[y];
+  const name = store.linkedFileNames[y];
+  if (h) {
+    badge.textContent = "Linked: " + h.name;
+    badge.style.background = "rgba(34, 197, 94, 0.25)";
+  } else if (name) {
+    badge.textContent = "File: " + name + " (Click Link Excel to re-bind)";
+    badge.style.background = "rgba(59, 130, 246, 0.25)";
+  } else {
+    badge.textContent = "File: Not Linked";
+    badge.style.background = "rgba(255,255,255,0.14)";
+  }
+}
+
+function createBlankWeekRows(templateRows) {
+  return BUS_LIST.map((busId, idx) => {
+    if (templateRows && templateRows[idx]) {
+      return Object.assign({}, templateRows[idx], { "Bus #": busId });
+    }
+    let row = {};
+    WEEKLY_COLUMNS.forEach(col => {
+      if (col === "Bus #") row[col] = busId;
+      else if (col === "Odometer Reading") row[col] = 0;
+      else if (FIELD_OPTIONS[col]) row[col] = FIELD_OPTIONS[col][0];
+      else row[col] = "";
+    });
+    return row;
+  });
+}
+
+function ensureYearSheets(yearStr) {
+  const yData = store.years[yearStr];
+  const weekDefs = yearStr === "2026" ? WEEKS_2026 : WEEKS_2027;
+  let lastRows = null;
+
+  if (yearStr === "2027" && Object.keys(store.years["2026"].weeklySheets).length > 0) {
+    const keys26 = Object.keys(store.years["2026"].weeklySheets);
+    lastRows = store.years["2026"].weeklySheets[keys26[keys26.length - 1]].rows;
+  }
+
+  weekDefs.forEach(w => {
+    if (!yData.weeklySheets[w.name]) {
+      yData.weeklySheets[w.name] = {
+        dateLabel: w.label,
+        isoDate: w.date,
+        rows: createBlankWeekRows(lastRows)
+      };
+    } else {
+      lastRows = yData.weeklySheets[w.name].rows;
+    }
+  });
+}
+
+async function ensureWritePermission(handle) {
+  if (!handle || !handle.queryPermission) return false;
+  let perm = await handle.queryPermission({ mode: "readwrite" });
+  if (perm === "granted") return true;
+  if (handle.requestPermission) {
+    perm = await handle.requestPermission({ mode: "readwrite" });
+    return perm === "granted";
+  }
+  return false;
+}
+
+async function writeDirectlyToHandle(handle, yearStr) {
+  if (!handle) return false;
+  const ok = await ensureWritePermission(handle);
+  if (!ok) return false;
+  const wb = buildXlsxWorkbookObject(yearStr);
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const writable = await handle.createWritable();
+  await writable.write(wbout);
+  await writable.close();
+  return true;
+}
+
+async function saveToLinkedExcel(forceDownloadIfNoHandle) {
+  const y = store.activeYear;
+  const handle = fileHandleByYear[y];
+  const targetName = getLinkedFileName(y);
+
+  if (handle) {
+    try {
+      const wrote = await writeDirectlyToHandle(handle, y);
+      if (wrote) {
+        showToast("Updated Linked Excel File: " + targetName);
+        return true;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  if (forceDownloadIfNoHandle) {
+    const wb = buildXlsxWorkbookObject(y);
+    XLSX.writeFile(wb, targetName);
+    showToast("Saved Excel File: " + targetName);
+  }
+  return false;
+}
+
+async function saveState(syncExcel) {
+  localStorage.setItem("kasur_ev_multi_year_v5", JSON.stringify(store));
+  updateKPIs();
+  updateLinkedFileBadge();
+  if (syncExcel) {
+    await saveToLinkedExcel(false);
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  setTimeout(() => { t.style.display = "none"; }, 3200);
+}
+
+window.onload = async function() {
+  ensureYearSheets("2026");
+  ensureYearSheets("2027");
+
+  fileHandleByYear["2026"] = await restoreHandleFromDB("2026");
+  fileHandleByYear["2027"] = await restoreHandleFromDB("2027");
+
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("dailyDate").value = today;
+  document.getElementById("dmgDate").value = today;
+  document.getElementById("activeYearSelect").value = store.activeYear;
+
+  const dmgBus = document.getElementById("dmgBus");
+  const repBus = document.getElementById("repBus");
+  BUS_LIST.forEach(b => {
+    dmgBus.innerHTML += '<option value="' + b + '">' + b + '</option>';
+    repBus.innerHTML += '<option value="' + b + '">' + b + '</option>';
+  });
+  renderBusPills();
+
+  const dmgCat = document.getElementById("dmgCategory");
+  WEEKLY_COLUMNS.slice(2).forEach(c => {
+    dmgCat.innerHTML += '<option value="' + c + '">' + c + '</option>';
+  });
+
+  const repStatus = document.getElementById("repStatus");
+  FLEET_STATUSES.forEach(s => {
+    repStatus.innerHTML += '<option value="' + s + '">' + s + '</option>';
+  });
+
+  document.getElementById("fsBodyTextarea").addEventListener("input", updateFsCharCount);
+
+  refreshAllUI();
+};
+
+function renderBusPills() {
+  const wrap = document.getElementById("dmgBusPills");
+  if (!wrap) return;
+  const cur = document.getElementById("dmgBus").value;
+  wrap.innerHTML = BUS_LIST.map(b => {
+    const active = b === cur;
+    return '<button type="button" onclick="selectBusForDamage(\'' + b + '\')" style="padding:3px 7px;font-size:0.72rem;border-radius:4px;border:1px solid #0f4c3a;cursor:pointer;font-weight:700;background:' + (active ? '#0f4c3a' : '#fff') + ';color:' + (active ? '#fff' : '#0f4c3a') + ';">' + b.replace("KSR-", "") + '</button>';
+  }).join("");
+}
+
+function selectBusForDamage(b) {
+  document.getElementById("dmgBus").value = b;
+  renderBusPills();
+}
+
+function switchActiveYear() {
+  store.activeYear = document.getElementById("activeYearSelect").value;
+  ensureYearSheets(store.activeYear);
+  const defDate = store.activeYear === "2026" ? "2026-11-20" : "2027-01-02";
+  document.getElementById("dailyDate").value = defDate;
+  document.getElementById("dmgDate").value = defDate;
+  saveState(false);
+  refreshAllUI();
+  showToast("Switched to " + store.activeYear + " Workbook");
+}
+
+function refreshAllUI() {
+  document.getElementById("kpi-year").textContent = store.activeYear;
+  updateLinkedFileBadge();
+  refreshWeekDropdowns();
+  renderDailyTable();
+  renderWeeklySheet();
+  renderDamageLog();
+  runReportFilter();
+  updateKPIs();
+}
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById(tabId).classList.add("active");
+  btn.classList.add("active");
+  if (tabId === "tab-reports") runReportFilter();
+}
+
+function getNextExpectedWeekName(isoDateStr) {
+  const yData = currentYearData();
+  const keys = Object.keys(yData.weeklySheets);
+  for (let i = 0; i < keys.length; i++) {
+    if ((yData.weeklySheets[keys[i]].isoDate || "") >= isoDateStr) return keys[i];
+  }
+  return keys[keys.length - 1];
+}
+
+function refreshWeekDropdowns() {
+  const yData = currentYearData();
+  const keys = Object.keys(yData.weeklySheets);
+  ["weekSelector", "dmgTargetWeek", "dailySyncWeek"].forEach(id => {
+    const el = document.getElementById(id);
+    el.innerHTML = "";
+    keys.forEach(k => {
+      el.innerHTML += '<option value="' + k + '">' + k + ' (' + (yData.weeklySheets[k].dateLabel || k) + ')</option>';
+    });
+  });
+  const dDate = document.getElementById("dailyDate").value;
+  const targetWk = getNextExpectedWeekName(dDate);
+  if (targetWk) {
+    document.getElementById("weekSelector").value = targetWk;
+    document.getElementById("dmgTargetWeek").value = targetWk;
+    document.getElementById("dailySyncWeek").value = targetWk;
+  }
+}
+
+function onDailyDateChange() {
+  const dDate = document.getElementById("dailyDate").value;
+  const targetWk = getNextExpectedWeekName(dDate);
+  if (targetWk) document.getElementById("dailySyncWeek").value = targetWk;
+  renderDailyTable();
+}
+
+async function linkExistingExcelFile() {
+  const y = store.activeYear;
+  if (window.showOpenFilePicker) {
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        multiple: false,
+        types: [{
+          description: "Excel Workbook",
+          accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx", ".xls"] }
+        }]
+      });
+      fileHandleByYear[y] = handle;
+      store.linkedFileNames[y] = handle.name;
+      await persistHandleToDB(y, handle);
+      const file = await handle.getFile();
+      await loadWorkbookBufferIntoStore(await file.arrayBuffer(), file.name, true);
+      showToast("Link Established With: " + file.name);
+      return;
+    } catch (e) {
+      if (e.name === "AbortError") return;
+    }
+  }
+  document.getElementById("excelUpload").click();
+}
+
+function loadWorkbookBufferIntoStore(arrayBuffer, fileName, keepHandle) {
+  const data = new Uint8Array(arrayBuffer);
+  const workbook = XLSX.read(data, { type: "array" });
+  const y = store.activeYear;
+  const yData = currentYearData();
+
+  if (!keepHandle) {
+    fileHandleByYear[y] = null;
+  }
+  if (fileName) {
+    store.linkedFileNames[y] = fileName;
+  }
+
+  workbook.SheetNames.forEach(sheetName => {
+    if (sheetName.toLowerCase().includes("sheet11") || sheetName === "Dashboard_Summary") return;
+    const ws = workbook.Sheets[sheetName];
+    const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+    if (raw.length < 2) return;
+
+    if (sheetName === "Daily_Fleet_Status") {
+      yData.dailyLogs = [];
+      for (let r = 1; r < raw.length; r++) {
+        if (!raw[r][0] || !raw[r][1]) continue;
+        yData.dailyLogs.push({
+          date: String(raw[r][0]),
+          bus: String(raw[r][1]),
+          status: String(raw[r][2] || "Operational (On Route)"),
+          odometer: raw[r][3] || "",
+          remarks: String(raw[r][4] || "")
+        });
+      }
+      return;
+    }
+
+    if (sheetName === "Damages_Log") {
+      yData.damageLogs = [];
+      for (let r = 1; r < raw.length; r++) {
+        if (!raw[r][0] || !raw[r][1]) continue;
+        yData.damageLogs.push({
+          id: Date.now() + r,
+          date: String(raw[r][0]),
+          bus: String(raw[r][1]),
+          category: String(raw[r][2] || "Bus Body (Int & Ext)"),
+          severity: String(raw[r][3] || "Minor"),
+          desc: String(raw[r][4] || ""),
+          targetWeek: String(raw[r][5] || ""),
+          status: String(raw[r][6] || "Pending")
+        });
+      }
+      return;
+    }
+
+    if (raw.length < 3) return;
+    const headers = raw[1].map(h => String(h || "").replace(/\s+/g, " ").trim());
+    let parsedRows = [];
+    for (let r = 2; r < raw.length; r++) {
+      const busCell = String(raw[r][0] || "").trim();
+      if (!busCell || (!busCell.startsWith("EV-") && !busCell.startsWith("KSR-"))) continue;
+      const normBus = busCell.replace("EV-", "KSR-");
+      let rowObj = {};
+      WEEKLY_COLUMNS.forEach(col => rowObj[col] = "");
+      rowObj["Bus #"] = normBus;
+
+      headers.forEach((h, cIdx) => {
+        const val = String(raw[r][cIdx] || "").trim();
+        const hl = h.toLowerCase();
+        if (hl.includes("odometer")) rowObj["Odometer Reading"] = Number(val) || 0;
+        else if (hl.includes("viper")) rowObj["Viper"] = val;
+        else if (h === "PIS") rowObj["PIS"] = val;
+        else if (hl.includes("obu") && !hl.includes("validator")) rowObj["OBU"] = val;
+        else if (hl.includes("master validator")) rowObj["Master Validator"] = val;
+        else if (hl.includes("slave validator")) rowObj["Slave Validator"] = val;
+        else if (hl.includes("side")) rowObj["Side Mirrors"] = val;
+        else if (hl.includes("cleanliness") && hl.includes("int")) rowObj["Cleanliness (Int. & Ext.)"] = val;
+        else if (hl.includes("ac")) rowObj["Cleanliness (AC Vents)"] = val;
+        else if (hl.includes("dust")) rowObj["Dust Cleaning (All Inspection Doors)"] = val;
+        else if (hl.includes("charging")) rowObj["Charging Ports"] = val;
+        else if (hl.includes("cctv")) rowObj["CCTV Cameras"] = val;
+        else if (hl.includes("seat")) rowObj["Seat Condition"] = val;
+        else if (hl.includes("emg")) rowObj["Emg. Equipment"] = val;
+        else if (hl.includes("windows")) rowObj["Windows & Doors"] = val;
+        else if (hl.includes("lights")) rowObj["Lights (Int & Ext)"] = val;
+        else if (hl.includes("bus body")) rowObj["Bus Body (Int & Ext)"] = val;
+        else if (hl.includes("other")) rowObj["Other (if any)"] = val;
+      });
+      parsedRows.push(rowObj);
+    }
+
+    if (parsedRows.length > 0) {
+      const full22 = BUS_LIST.map(bId => parsedRows.find(x => x["Bus #"] === bId) || createBlankWeekRows().find(x => x["Bus #"] === bId));
+      yData.weeklySheets[sheetName] = {
+        dateLabel: String(raw[0][14] || raw[0][15] || sheetName).replace("Date:", "").trim(),
+        isoDate: yData.weeklySheets[sheetName] ? yData.weeklySheets[sheetName].isoDate : "",
+        rows: full22
+      };
+    }
+  });
+
+  ensureYearSheets(y);
+  saveState(false);
+  refreshAllUI();
+}
+
+async function handleExcelImport(event) {
+  const fileInput = event.target;
+  const file = fileInput.files[0];
+  if (!file) return;
+  const y = store.activeYear;
+  store.linkedFileNames[y] = file.name;
+
+  if (window.showSaveFilePicker && !fileHandleByYear[y]) {
+    try {
+      const picked = await window.showSaveFilePicker({
+        suggestedName: file.name,
+        types: [{
+          description: "Excel Workbook",
+          accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] }
+        }]
+      });
+      fileHandleByYear[y] = picked;
+      store.linkedFileNames[y] = picked.name;
+      await persistHandleToDB(y, picked);
+    } catch (e) {}
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    loadWorkbookBufferIntoStore(e.target.result, getLinkedFileName(y), Boolean(fileHandleByYear[y]));
+    showToast("Imported & Linked: " + getLinkedFileName(y));
+    fileInput.value = "";
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function splitValueForField(col, rawVal) {
+  const str = String(rawVal || "");
+  const opts = FIELD_OPTIONS[col] || [];
+  const parts = str.split(" | ").map(s => s.trim()).filter(Boolean);
+  let selected = [];
+  let custom = [];
+  parts.forEach(p => {
+    if (opts.includes(p)) selected.push(p);
+    else custom.push(p);
+  });
+  return { selected, custom: custom.join(" | ") };
+}
+
+function combineFieldValue(selectedArr, customStr) {
+  const combined = [...selectedArr];
+  if (customStr && customStr.trim()) combined.push(customStr.trim());
+  return combined.join(" | ");
+}
+
+function renderDailyTable() {
+  const date = document.getElementById("dailyDate").value;
+  const syncWeek = document.getElementById("dailySyncWeek").value;
+  const yData = currentYearData();
+  const tbody = document.getElementById("dailyTableBody");
+  tbody.innerHTML = "";
+
+  const existingForDate = yData.dailyLogs.filter(d => d.date === date);
+  const weekRows = yData.weeklySheets[syncWeek] ? yData.weeklySheets[syncWeek].rows : [];
+
+  BUS_LIST.forEach(bus => {
+    const wkRow = weekRows.find(w => w["Bus #"] === bus) || {};
+    const rec = existingForDate.find(x => x.bus === bus) || {
+      bus,
+      date,
+      status: "Operational (On Route)",
+      odometer: wkRow["Odometer Reading"] || "",
+      remarks: ""
+    };
+
+    const optHtml = FLEET_STATUSES.map(st =>
+      '<option value="' + st + '"' + (rec.status === st ? ' selected' : '') + '>' + st + '</option>'
+    ).join("");
+
+    const noteCount = WEEKLY_COLUMNS.slice(2).filter(c => {
+      const v = String(wkRow[c] || "").trim();
+      if (!v) return false;
+      const def = FIELD_OPTIONS[c] ? FIELD_OPTIONS[c][0] : "";
+      return v !== def;
+    }).length;
+
+    tbody.innerHTML +=
+      '<tr data-bus="' + bus + '">' +
+        '<td><strong>' + bus + '</strong></td>' +
+        '<td>' + date + '</td>' +
+        '<td><select class="d-status">' + optHtml + '</select></td>' +
+        '<td><input type="number" class="d-odo" value="' + rec.odometer + '" placeholder="KM" style="width:100px;"></td>' +
+        '<td><input type="text" class="d-rem" value="' + String(rec.remarks || "").replace(/"/g, "&quot;") + '" placeholder="Daily remarks" style="width:220px;"></td>' +
+        '<td>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+            '<button type="button" class="btn btn-outline" style="padding:5px 9px;font-size:0.78rem;" onclick="openBusWeeklyModal(\'' + bus + '\')">Multi-Select & Edit (' + noteCount + ')</button>' +
+            '<button type="button" class="btn btn-primary" style="padding:5px 9px;font-size:0.78rem;" onclick="openBusBodyFullScreen(\'daily\', \'' + bus + '\')">Body Remarks (Full Screen)</button>' +
+          '</div>' +
+        '</td>' +
+      '</tr>';
+  });
+  updateKPIs();
+}
+
+function saveDailyAndSyncWeekly() {
+  const date = document.getElementById("dailyDate").value;
+  const syncWeek = document.getElementById("dailySyncWeek").value;
+  if (!date) return alert("Select a date first.");
+
+  const yData = currentYearData();
+  yData.dailyLogs = yData.dailyLogs.filter(d => d.date !== date);
+
+  document.querySelectorAll("#dailyTableBody tr").forEach(tr => {
+    const bus = tr.getAttribute("data-bus");
+    const status = tr.querySelector(".d-status").value;
+    const odometer = tr.querySelector(".d-odo").value;
+    const remarks = tr.querySelector(".d-rem").value.trim();
+
+    yData.dailyLogs.push({ date, bus, status, odometer, remarks });
+
+    if (yData.weeklySheets[syncWeek]) {
+      const wkRow = yData.weeklySheets[syncWeek].rows.find(r => r["Bus #"] === bus);
+      if (wkRow) {
+        if (odometer && Number(odometer) > 0) wkRow["Odometer Reading"] = Number(odometer);
+        if (remarks && (status.startsWith("Breakdown") || status.includes("Hold") || status.includes("Maintenance"))) {
+          const entry = "[" + date + "] " + status + ": " + remarks;
+          if (!String(wkRow["Other (if any)"]).includes(remarks)) {
+            wkRow["Other (if any)"] = wkRow["Other (if any)"] ? wkRow["Other (if any)"] + " | " + entry : entry;
+          }
+        }
+      }
+    }
+  });
+
+  saveState(true);
+  renderWeeklySheet();
+  showToast("Daily Status Saved & Synced to " + syncWeek);
+}
+
+function copyPreviousDayStatus() {
+  const date = document.getElementById("dailyDate").value;
+  const yData = currentYearData();
+  const prevDates = [...new Set(yData.dailyLogs.map(d => d.date))].filter(d => d < date).sort();
+  if (!prevDates.length) return showToast("No previous day record found");
+  const lastDate = prevDates[prevDates.length - 1];
+  const prevRecs = yData.dailyLogs.filter(d => d.date === lastDate);
+  yData.dailyLogs = yData.dailyLogs.filter(d => d.date !== date);
+  prevRecs.forEach(r => yData.dailyLogs.push(Object.assign({}, r, { date })));
+  saveState(false);
+  renderDailyTable();
+  showToast("Copied status from " + lastDate);
+}
+
+let modalActiveBus = null;
+
+function openBusWeeklyModal(bus) {
+  modalActiveBus = bus;
+  const syncWeek = document.getElementById("dailySyncWeek").value;
+  const wkRow = currentYearData().weeklySheets[syncWeek].rows.find(r => r["Bus #"] === bus);
+
+  document.getElementById("modalTitle").textContent = "Weekly Inspection Multi-Select & Custom Edit — " + bus + " (" + syncWeek + ")";
+  const grid = document.getElementById("modalFieldsGrid");
+  grid.innerHTML = "";
+
+  WEEKLY_COLUMNS.slice(1).forEach(col => {
+    const rawVal = wkRow[col] !== undefined ? String(wkRow[col]) : "";
+    if (col === "Odometer Reading") {
+      grid.innerHTML +=
+        '<div class="item-editor-card">' +
+          '<div class="item-editor-title"><span>Odometer Reading (KM)</span></div>' +
+          '<input type="number" class="custom-edit-input" data-odo-input="1" value="' + rawVal + '">' +
+        '</div>';
+    } else if (FIELD_OPTIONS[col]) {
+      const parsed = splitValueForField(col, rawVal);
+      const checksHtml = FIELD_OPTIONS[col].map(opt => {
+        const checked = parsed.selected.includes(opt) ? " checked" : "";
+        return '<label class="opt-check-row"><input type="checkbox" data-modal-chk="' + col + '" value="' + opt.replace(/"/g, "&quot;") + '"' + checked + '><span>' + opt + '</span></label>';
+      }).join("");
+
+      grid.innerHTML +=
+        '<div class="item-editor-card" data-modal-item="' + col + '">' +
+          '<div class="item-editor-title"><span>' + col + '</span></div>' +
+          '<div class="multi-opts-box">' + checksHtml + '</div>' +
+          '<input type="text" class="custom-edit-input" data-modal-custom="' + col + '" value="' + parsed.custom.replace(/"/g, "&quot;") + '" placeholder="Custom edit / specific remarks for ' + col + '...">' +
+        '</div>';
+    } else if (col === "Bus Body (Int & Ext)") {
+      grid.innerHTML +=
+        '<div class="item-editor-card" style="grid-column: 1 / -1;border:2px solid var(--primary);background:#f0fdf4;" data-modal-item="' + col + '">' +
+          '<div class="item-editor-title">' +
+            '<span>Bus Body (Int & Ext) — Editable Remarks</span>' +
+            '<button type="button" class="btn btn-primary" style="padding:5px 10px;font-size:0.78rem;" onclick="openBusBodyFullScreen(\'modal\', \'' + bus + '\')">Full Screen Editor</button>' +
+          '</div>' +
+          '<textarea id="modalBusBodyTextarea" class="custom-edit-input" rows="4" style="font-size:0.9rem;line-height:1.45;" data-modal-custom="' + col + '" placeholder="Enter Bus Body (Interior & Exterior) remarks...">' + rawVal + '</textarea>' +
+        '</div>';
+    } else {
+      grid.innerHTML +=
+        '<div class="item-editor-card" style="grid-column: 1 / -1;" data-modal-item="' + col + '">' +
+          '<div class="item-editor-title"><span>' + col + ' (Editable Remarks)</span></div>' +
+          '<textarea class="custom-edit-input" rows="2" data-modal-custom="' + col + '" placeholder="Enter custom status or remarks for ' + col + '...">' + rawVal + '</textarea>' +
+        '</div>';
+    }
+  });
+
+  document.getElementById("busWeeklyModal").style.display = "flex";
+}
+
+function closeBusModal() {
+  document.getElementById("busWeeklyModal").style.display = "none";
+}
+
+function saveBusModalData() {
+  const syncWeek = document.getElementById("dailySyncWeek").value;
+  const wkRow = currentYearData().weeklySheets[syncWeek].rows.find(r => r["Bus #"] === modalActiveBus);
+
+  const odoEl = document.querySelector("[data-odo-input]");
+  if (odoEl) wkRow["Odometer Reading"] = Number(odoEl.value) || 0;
+
+  WEEKLY_COLUMNS.slice(2).forEach(col => {
+    if (FIELD_OPTIONS[col]) {
+      const checkedVals = [...document.querySelectorAll('input[type="checkbox"][data-modal-chk="' + col + '"]:checked')].map(cb => cb.value);
+      const customEl = document.querySelector('[data-modal-custom="' + col + '"]');
+      const customVal = customEl ? customEl.value : "";
+      wkRow[col] = combineFieldValue(checkedVals, customVal);
+    } else {
+      const customEl = document.querySelector('[data-modal-custom="' + col + '"]');
+      if (customEl) wkRow[col] = customEl.value;
+    }
+  });
+
+  saveState(true);
+  closeBusModal();
+  renderDailyTable();
+  renderWeeklySheet();
+  showToast("Updated " + modalActiveBus + " in " + syncWeek);
+}
+
+// FULL SCREEN EDITOR FOR BUS BODY (INT & EXT)
+let fsBodyContext = { mode: "daily", bus: "KSR-01", weekName: "", rowIdx: -1 };
+
+function openBusBodyFullScreen(mode, bus, rowIdx) {
+  const weekName = mode === "weekly"
+    ? document.getElementById("weekSelector").value
+    : document.getElementById("dailySyncWeek").value;
+
+  const sheet = currentYearData().weeklySheets[weekName];
+  const wkRow = sheet ? sheet.rows.find(r => r["Bus #"] === bus) : null;
+
+  let currentText = wkRow ? String(wkRow["Bus Body (Int & Ext)"] || "") : "";
+  if (mode === "modal") {
+    const modalTa = document.getElementById("modalBusBodyTextarea");
+    if (modalTa) currentText = modalTa.value;
+  } else if (mode === "weekly" && typeof rowIdx === "number") {
+    const wkTa = document.querySelector('[data-wk-txt="' + rowIdx + '"][data-col="Bus Body (Int & Ext)"]');
+    if (wkTa) currentText = wkTa.value;
+  }
+
+  fsBodyContext = { mode, bus, weekName, rowIdx: typeof rowIdx === "number" ? rowIdx : -1 };
+  document.getElementById("fsBodyTitle").textContent = "Bus Body (Int & Ext) — " + bus + " (" + weekName + ")";
+  document.getElementById("fsBodySubtitle").textContent = "Full Screen Reading & Writing Mode — Changes sync directly to " + weekName;
+
+  const ta = document.getElementById("fsBodyTextarea");
+  ta.value = currentText;
+  updateFsCharCount();
+
+  document.getElementById("busBodyFullScreenModal").style.display = "flex";
+  setTimeout(() => ta.focus(), 50);
+}
+
+function updateFsCharCount() {
+  const len = document.getElementById("fsBodyTextarea").value.length;
+  document.getElementById("fsCharCount").textContent = len + " characters";
+}
+
+function appendFsBodyTag(snippet) {
+  const ta = document.getElementById("fsBodyTextarea");
+  const cur = ta.value.trim();
+  ta.value = cur ? cur + " | " + snippet : snippet;
+  updateFsCharCount();
+  ta.focus();
+}
+
+function closeBusBodyFullScreen() {
+  document.getElementById("busBodyFullScreenModal").style.display = "none";
+}
+
+function applyBusBodyFullScreen() {
+  const newVal = document.getElementById("fsBodyTextarea").value;
+  const { mode, bus, weekName, rowIdx } = fsBodyContext;
+
+  const sheet = currentYearData().weeklySheets[weekName];
+  if (sheet) {
+    const wkRow = sheet.rows.find(r => r["Bus #"] === bus);
+    if (wkRow) wkRow["Bus Body (Int & Ext)"] = newVal;
+  }
+
+  if (mode === "modal") {
+    const modalTa = document.getElementById("modalBusBodyTextarea");
+    if (modalTa) modalTa.value = newVal;
+  } else if (mode === "weekly" && rowIdx >= 0) {
+    const wkTa = document.querySelector('[data-wk-txt="' + rowIdx + '"][data-col="Bus Body (Int & Ext)"]');
+    if (wkTa) wkTa.value = newVal;
+  }
+
+  saveState(true);
+  renderDailyTable();
+  if (mode !== "weekly") renderWeeklySheet();
+  closeBusBodyFullScreen();
+  showToast("Saved Bus Body (Int & Ext) Remarks for " + bus);
+}
+
+function renderWeeklySheet() {
+  const weekName = document.getElementById("weekSelector").value;
+  const sheet = currentYearData().weeklySheets[weekName];
+  if (!sheet) return;
+
+  const thead = document.getElementById("weeklyThead");
+  const tbody = document.getElementById("weeklyTbody");
+
+  thead.innerHTML = "<tr>" + WEEKLY_COLUMNS.map(c => "<th>" + c + "</th>").join("") + "</tr>";
+  tbody.innerHTML = "";
+
+  sheet.rows.forEach((r, rIdx) => {
+    const busId = r["Bus #"];
+    const cells = WEEKLY_COLUMNS.map(col => {
+      const val = r[col] !== undefined ? String(r[col]) : "";
+      if (col === "Bus #") {
+        return "<td><strong>" + val + "</strong></td>";
+      } else if (col === "Odometer Reading") {
+        return '<td><input type="number" class="custom-edit-input" style="width:95px;" data-wk-odo="' + rIdx + '" value="' + val + '"></td>';
+      } else if (FIELD_OPTIONS[col]) {
+        const parsed = splitValueForField(col, val);
+        const checks = FIELD_OPTIONS[col].map(opt => {
+          const chk = parsed.selected.includes(opt) ? " checked" : "";
+          return '<label><input type="checkbox" data-wk-chk="' + rIdx + '" data-col="' + col + '" value="' + opt.replace(/"/g, "&quot;") + '"' + chk + '><span>' + opt + '</span></label>';
+        }).join("");
+        return '<td><div class="wk-cell-box"><div class="wk-cell-opts">' + checks + '</div><input type="text" class="custom-edit-input" data-wk-txt="' + rIdx + '" data-col="' + col + '" value="' + parsed.custom.replace(/"/g, "&quot;") + '" placeholder="Custom note..."></div></td>';
+      } else if (col === "Bus Body (Int & Ext)") {
+        return '<td>' +
+          '<div style="display:flex;flex-direction:column;gap:5px;min-width:230px;">' +
+            '<textarea class="custom-edit-input" rows="2" data-wk-txt="' + rIdx + '" data-col="' + col + '" placeholder="Bus Body remarks...">' + val + '</textarea>' +
+            '<button type="button" class="btn btn-primary" style="padding:4px 8px;font-size:0.74rem;justify-content:center;" onclick="openBusBodyFullScreen(\'weekly\', \'' + busId + '\', ' + rIdx + ')">Open Full Screen</button>' +
+          '</div>' +
+        '</td>';
+      } else {
+        return '<td><textarea class="custom-edit-input" rows="2" style="min-width:200px;" data-wk-txt="' + rIdx + '" data-col="' + col + '" placeholder="Custom remarks...">' + val + '</textarea></td>';
+      }
+    }).join("");
+    tbody.innerHTML += "<tr>" + cells + "</tr>";
+  });
+}
+
+function saveWeeklyTableEdits() {
+  const weekName = document.getElementById("weekSelector").value;
+  const sheet = currentYearData().weeklySheets[weekName];
+  if (!sheet) return;
+
+  sheet.rows.forEach((row, rIdx) => {
+    const odoInput = document.querySelector('[data-wk-odo="' + rIdx + '"]');
+    if (odoInput) row["Odometer Reading"] = Number(odoInput.value) || 0;
+
+    WEEKLY_COLUMNS.slice(2).forEach(col => {
+      if (FIELD_OPTIONS[col]) {
+        const chks = [...document.querySelectorAll('input[type="checkbox"][data-wk-chk="' + rIdx + '"][data-col="' + col + '"]:checked')].map(x => x.value);
+        const txtEl = document.querySelector('[data-wk-txt="' + rIdx + '"][data-col="' + col + '"]');
+        row[col] = combineFieldValue(chks, txtEl ? txtEl.value : "");
+      } else {
+        const txtEl = document.querySelector('[data-wk-txt="' + rIdx + '"][data-col="' + col + '"]');
+        if (txtEl) row[col] = txtEl.value;
+      }
+    });
+  });
+
+  saveState(true);
+  renderDailyTable();
+  showToast("Saved " + weekName + " & Synced to Linked Excel");
+}
+
+function carryForwardPreviousWeek() {
+  const weekName = document.getElementById("weekSelector").value;
+  const yData = currentYearData();
+  const keys = Object.keys(yData.weeklySheets);
+  const idx = keys.indexOf(weekName);
+  if (idx <= 0) return showToast("No previous week available");
+  yData.weeklySheets[weekName].rows = yData.weeklySheets[keys[idx - 1]].rows.map(r => Object.assign({}, r));
+  saveState(true);
+  renderWeeklySheet();
+  showToast("Carried forward from " + keys[idx - 1]);
+}
+
+function addDamageEntry(e) {
+  e.preventDefault();
+  const date = document.getElementById("dmgDate").value;
+  const bus = document.getElementById("dmgBus").value;
+  const category = document.getElementById("dmgCategory").value;
+  const severity = document.getElementById("dmgSeverity").value;
+  const status = document.getElementById("dmgStatus").value;
+  const targetWeek = document.getElementById("dmgTargetWeek").value;
+  const desc = document.getElementById("dmgDesc").value.trim();
+
+  const yData = currentYearData();
+  yData.damageLogs.unshift({ id: Date.now(), date, bus, category, severity, status, targetWeek, desc });
+
+  if (yData.weeklySheets[targetWeek]) {
+    const row = yData.weeklySheets[targetWeek].rows.find(r => r["Bus #"] === bus);
+    if (row) {
+      const note = "[" + date + "] " + desc;
+      row[category] = row[category] ? row[category] + " | " + note : note;
+    }
+  }
+
+  saveState(true);
+  renderDamageLog();
+  renderWeeklySheet();
+  renderDailyTable();
+  document.getElementById("dmgDesc").value = "";
+  showToast("Damage Saved & Synced to " + targetWeek);
+}
+
+function toggleDamageStatus(id) {
+  const item = currentYearData().damageLogs.find(d => d.id === id);
+  if (item) {
+    item.status = item.status === "Resolved" ? "Pending" : "Resolved";
+    saveState(true);
+    renderDamageLog();
+  }
+}
+
+function renderDamageLog() {
+  const tbody = document.getElementById("damageLogBody");
+  tbody.innerHTML = "";
+  currentYearData().damageLogs.forEach(d => {
+    tbody.innerHTML +=
+      "<tr>" +
+        "<td>" + d.date + "</td>" +
+        "<td><strong>" + d.bus + "</strong></td>" +
+        "<td>" + d.category + "</td>" +
+        "<td>" + d.severity + "</td>" +
+        "<td>" + d.desc + "</td>" +
+        "<td>" + d.targetWeek + "</td>" +
+        "<td>" + d.status + "</td>" +
+        '<td><button class="btn btn-outline" style="padding:4px 8px;font-size:0.74rem;" onclick="toggleDamageStatus(' + d.id + ')">Toggle Status</button></td>' +
+      "</tr>";
+  });
+}
+
+function runReportFilter() {
+  const type = document.getElementById("repType").value;
+  const bus = document.getElementById("repBus").value;
+  const from = document.getElementById("repFrom").value;
+  const to = document.getElementById("repTo").value;
+  const status = document.getElementById("repStatus").value;
+  const yData = currentYearData();
+
+  const thead = document.getElementById("repThead");
+  const tbody = document.getElementById("repTbody");
+  tbody.innerHTML = "";
+
+  if (type === "daily") {
+    thead.innerHTML = "<tr><th>Date</th><th>Bus #</th><th>Status</th><th>Odometer</th><th>Remarks</th></tr>";
+    const list = yData.dailyLogs.filter(r => {
+      if (bus !== "ALL" && r.bus !== bus) return false;
+      if (from && r.date < from) return false;
+      if (to && r.date > to) return false;
+      if (status !== "ALL" && r.status !== status) return false;
+      return true;
+    }).sort((a, b) => b.date.localeCompare(a.date));
+    window.currentFilteredData = list;
+    list.forEach(r => {
+      tbody.innerHTML += "<tr><td>" + r.date + "</td><td><strong>" + r.bus + "</strong></td><td>" + r.status + "</td><td>" + r.odometer + "</td><td>" + r.remarks + "</td></tr>";
+    });
+  } else {
+    thead.innerHTML = "<tr><th>Date</th><th>Bus #</th><th>Category</th><th>Severity</th><th>Description</th><th>Status</th></tr>";
+    const list = yData.damageLogs.filter(r => {
+      if (bus !== "ALL" && r.bus !== bus) return false;
+      if (from && r.date < from) return false;
+      if (to && r.date > to) return false;
+      return true;
+    });
+    window.currentFilteredData = list;
+    list.forEach(r => {
+      tbody.innerHTML += "<tr><td>" + r.date + "</td><td><strong>" + r.bus + "</strong></td><td>" + r.category + "</td><td>" + r.severity + "</td><td>" + r.desc + "</td><td>" + r.status + "</td></tr>";
+    });
+  }
+}
+
+function buildXlsxWorkbookObject(yearStr) {
+  const yData = store.years[yearStr];
+  const wb = XLSX.utils.book_new();
+
+  const dailyRows = yData.dailyLogs.length
+    ? yData.dailyLogs.map(r => ({ Date: r.date, "Bus #": r.bus, Status: r.status, "Odometer (KM)": r.odometer, Remarks: r.remarks }))
+    : [{ Date: "", "Bus #": "", Status: "", "Odometer (KM)": "", Remarks: "" }];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dailyRows), "Daily_Fleet_Status");
+
+  const dmgRows = yData.damageLogs.length
+    ? yData.damageLogs.map(d => ({ Date: d.date, "Bus #": d.bus, Category: d.category, Severity: d.severity, Description: d.desc, "Synced Week": d.targetWeek, Status: d.status }))
+    : [{ Date: "", "Bus #": "", Category: "", Severity: "", Description: "", "Synced Week": "", Status: "" }];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dmgRows), "Damages_Log");
+
+  Object.keys(yData.weeklySheets).forEach(wName => {
+    const s = yData.weeklySheets[wName];
+    const aoa = [
+      ["", "City: KASUR", "", "", "", "", "", "", "Night Duty Bus Inspection Sheet", "", "", "", "", "", "", "Date: " + (s.dateLabel || wName)],
+      WEEKLY_COLUMNS,
+      ...s.rows.map(r => WEEKLY_COLUMNS.map(c => r[c] ?? "")),
+      ["", "", "", "", "", "", "", "", "", "", "", "", "Reported by: Muhammad Mutal (TEI-283)"]
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    XLSX.utils.book_append_sheet(wb, ws, wName.substring(0, 31));
+  });
+  return wb;
+}
+
+function exportSingleWeekExcel() {
+  const wName = document.getElementById("weekSelector").value;
+  const s = currentYearData().weeklySheets[wName];
+  const wb = XLSX.utils.book_new();
+  const aoa = [
+    ["", "City: KASUR", "", "", "", "", "", "", "Night Duty Bus Inspection Sheet", "", "", "", "", "", "", "Date: " + (s.dateLabel || wName)],
+    WEEKLY_COLUMNS,
+    ...s.rows.map(r => WEEKLY_COLUMNS.map(c => r[c] ?? ""))
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), wName.substring(0, 31));
+  XLSX.writeFile(wb, "Inspection_" + wName.replace(/\s+/g, "_") + ".xlsx");
+}
+
+function exportFilteredExcel() {
+  const data = window.currentFilteredData || [];
+  if (!data.length) return showToast("No records match filter");
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Filtered_Report");
+  XLSX.writeFile(wb, "Kasur_EV_" + store.activeYear + "_Filtered_Report.xlsx");
+}
+
+function sendToWhatsApp(text) {
+  window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+}
+
+function shareDailyWhatsApp() {
+  const date = document.getElementById("dailyDate").value;
+  const recs = currentYearData().dailyLogs.filter(d => d.date === date);
+  if (!recs.length) return showToast("Save daily status first");
+  const op = recs.filter(r => r.status.startsWith("Operational")).length;
+  const sb = recs.filter(r => r.status.startsWith("Standby")).length;
+  const bd = recs.filter(r => r.status.startsWith("Breakdown") || r.status.includes("Hold"));
+  let lines = [
+    "*PTC KASUR DEPOT — DAILY EV FLEET REPORT*",
+    "*Date:* " + date,
+    "*Operational:* " + op + " | *Standby:* " + sb + " | *Breakdown/Hold:* " + bd.length,
+    ""
+  ];
+  bd.forEach(b => lines.push("• *" + b.bus + "*: " + b.status + (b.remarks ? " (" + b.remarks + ")" : "")));
+  lines.push("", "_Reported by: Muhammad Mutal (TEI-283)_");
+  sendToWhatsApp(lines.join("\n"));
+}
+
+function shareWeeklyWhatsApp() {
+  const wName = document.getElementById("weekSelector").value;
+  const s = currentYearData().weeklySheets[wName];
+  let lines = ["*WEEKLY EV INSPECTION — KASUR (" + wName + ")*", ""];
+  s.rows.forEach(r => {
+    lines.push("• *" + r["Bus #"] + "* | Odo: " + r["Odometer Reading"] + " km");
+  });
+  lines.push("", "_Reported by: Muhammad Mutal (TEI-283)_");
+  sendToWhatsApp(lines.join("\n"));
+}
+
+function shareFilteredWhatsApp() {
+  const data = window.currentFilteredData || [];
+  if (!data.length) return showToast("No filtered data");
+  const type = document.getElementById("repType").value;
+  let lines = ["*PTC KASUR EV (" + store.activeYear + ") — FILTERED REPORT*", "Records: " + data.length, ""];
+  data.slice(0, 25).forEach(r => {
+    if (type === "daily") lines.push("• [" + r.date + "] *" + r.bus + "*: " + r.status + (r.remarks ? " — " + r.remarks : ""));
+    else lines.push("• [" + r.date + "] *" + r.bus + "* (" + r.category + "): " + r.desc + " [" + r.status + "]");
+  });
+  sendToWhatsApp(lines.join("\n"));
+}
+
+function updateKPIs() {
+  const date = document.getElementById("dailyDate").value;
+  const yData = currentYearData();
+  const recs = yData.dailyLogs.filter(d => d.date === date);
+  document.getElementById("kpi-op").textContent = recs.filter(r => r.status.startsWith("Operational")).length;
+  document.getElementById("kpi-sb").textContent = recs.filter(r => r.status.startsWith("Standby")).length;
+  document.getElementById("kpi-bd").textContent = recs.filter(r => r.status.startsWith("Breakdown") || r.status.includes("Hold")).length;
+  document.getElementById("kpi-dmg").textContent = yData.damageLogs.filter(d => d.status !== "Resolved").length;
+}
+</script>
+</body>
+</html>
